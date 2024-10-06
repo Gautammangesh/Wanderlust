@@ -1,0 +1,111 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-5">
+  <h1>Search Results for "<%= query %>"</h1>
+
+  <!-- Tax Toggle -->
+  <div class="tax-toggle">
+    <div class="form-check-reverse form-switch">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        role="switch"
+        id="flexSwitchCheckDefault" />
+      <label class="form-check-label" for="flexSwitchCheckDefault">
+        Display total after taxes
+      </label>
+    </div>
+  </div>
+
+  <!-- Listings Result -->
+  <% if (listings.length > 0) { %>
+  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
+    <% listings.forEach(listing => { %>
+    <a href="/listings/<%= listing._id %>" class="listing-link">
+      <div class="card col listing-card">
+        <img
+          src="<%= listing.image.url %>"
+          class="card-img-top"
+          alt="listing_image"
+          style="height: 20rem" />
+        <div class="card-img-overlay"></div>
+        <div class="card-body">
+          <p class="card-text">
+            <b><%= listing.title %></b><br />
+            &#8377;
+            <span class="price"
+              ><%= listing.price.toLocaleString("en-IN") %></span
+            >
+            / night
+            <i class="tax-info" style="display: none">
+              &nbsp; &nbsp;+18% GST (Total: ₹
+              <span class="total-price"></span>)</i
+            >
+          </p>
+        </div>
+      </div>
+    </a>
+    <% }) %>
+  </div>
+  <% } else { %>
+  <h2>No results found for "<%= query %>"</h2>
+  <% } %>
+</div>
+
+<script>
+  // Tax toggle script
+  let taxSwitch = document.getElementById("flexSwitchCheckDefault");
+  taxSwitch.addEventListener("click", () => {
+    let taxInfo = document.getElementsByClassName("tax-info");
+    let prices = document.querySelectorAll(".price"); // Get all price elements
+    for (let i = 0; i < taxInfo.length; i++) {
+      let priceElement = prices[i]; // Get the price element corresponding to the listing
+      let price = parseFloat(
+        priceElement.innerText.replace(/,/g, "").replace("₹", "").trim()
+      ); // Extract price
+      let gst = 0.18 * price; // Calculate GST
+      let total = price + gst; // Total price after GST
+
+      if (taxInfo[i].style.display !== "inline") {
+        taxInfo[i].style.display = "inline";
+        taxInfo[i].querySelector(".total-price").innerText =
+          total.toLocaleString("en-IN"); // Update the total price in the tax info
+      } else {
+        taxInfo[i].style.display = "none"; // Hide tax info
+      }
+    }
+  });
+</script>
+
+<style>
+  /* Center the Search Result Text */
+  .container h1 {
+    text-align: center; /* Center align the heading */
+    margin-bottom: 1rem; /* Add some space below the heading */
+  }
+
+  /* Style for the Tax Toggle Box */
+  .tax-toggle {
+    border: 1px solid black;
+    border-radius: 1rem;
+    height: 3rem; /* Adjust height */
+    padding: 0.5rem 1rem; /* Adjust padding */
+    margin-left: 1; /* Center horizontally */
+    margin-right: auto; /* Center horizontally */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center contents */
+    width: fit-content; /* Adjust width to content */
+  }
+
+  /* Adjusting the switch label */
+  .form-check-label {
+    font-size: 0.9rem; /* Font size for the label */
+    margin-left: 0.5rem; /* Space between the checkbox and label */
+  }
+
+  /* Tax Info */
+  .tax-info {
+    display: none;
+  }
+</style>
