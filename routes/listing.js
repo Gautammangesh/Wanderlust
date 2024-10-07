@@ -8,6 +8,16 @@ const multer = require("multer");
 const { storage } = require("../cloudConfig.js");
 const upload = multer({ storage });
 
+router
+  .route("/")
+  .get(wrapAsync(listingController.index))
+  .post(
+    isLoggedIn,
+    upload.single("listing[image]"),
+    validateListing,
+    wrapAsync(listingController.createListing)
+  );
+
 // Search Route
 router.get(
   "/search",
@@ -32,25 +42,15 @@ router.get(
   })
 );
 
-router
-  .route("/")
-  .get(wrapAsync(listingController.index))
-  .post(
-    isLoggedIn,
-    upload.single("listing[image]"),
-    validateListing,
-    wrapAsync(listingController.createListing)
-  );
-
-router
-  .route("/")
-  .get(wrapAsync(listingController.index))
-  .post(
-    isLoggedIn,
-    upload.single("listing[image]"),
-    validateListing,
-    wrapAsync(listingController.createListing)
-  );
+// router
+//   .route("/")
+//   .get(wrapAsync(listingController.index))
+//   .post(
+//     isLoggedIn,
+//     upload.single("listing[image]"),
+//     validateListing,
+//     wrapAsync(listingController.createListing)
+//   );
 
 //New Route
 router.get("/new", isLoggedIn, listingController.renderNewForm);
