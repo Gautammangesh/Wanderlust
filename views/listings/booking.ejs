@@ -46,12 +46,7 @@
 
   <div class="col-8 offset-3 mb-3">
     <% if(currUser) { %>
-    <button
-      id="bookNowBtn"
-      class="btn btn-outline-dark"
-      style="margin-top: 8px; margin-left: -4px">
-      Book Now
-    </button>
+    <button id="bookNowBtn" class="btn btn-outline-dark">Book Now</button>
 
     <!-- Booking Form (Hidden Initially) -->
     <div id="bookingForm" class="modal">
@@ -225,14 +220,9 @@
     <div id="map" style="width: 100%; height: 400px"></div>
   </div>
 
-  <!-- In your show.ejs file (views/listings/show.ejs) -->
-  <% if (success.length) { %>
+  <% if (message) { %>
   <div class="flash-message">
-    <p><%= success %></p>
-  </div>
-  <% } %> <% if (error.length) { %>
-  <div class="flash-message error">
-    <p><%= error %></p>
+    <p><%= message %></p>
   </div>
   <% } %>
 </div>
@@ -278,59 +268,49 @@
 </style>
 
 <script>
-      var modal = document.getElementById("bookingForm");
-      var btn = document.getElementById("bookNowBtn");
-      var span = document.getElementsByClassName("close")[0];
+  var modal = document.getElementById("bookingForm");
+  var btn = document.getElementById("bookNowBtn");
+  var span = document.getElementsByClassName("close")[0];
 
-      btn.onclick = function() {
-        modal.style.display = "block";
-      }
-      span.onclick = function() {
-        modal.style.display = "none";
-      }
-      window.onclick = function(event) {
-        if (event.target == modal) {
-          modal.style.display = "none";
-        }
-      }
-
-      setTimeout(function() {
-        const flashMessage = document.querySelector('.flash-message');
-        if (flashMessage) {
-          flashMessage.style.display = 'none';
-        }
-      }, 3000);
-
-      // Calculate total price based on start and end dates
-      document.getElementById('endDate').addEventListener('change', function() {
-        const startDate = new Date(document.getElementById('startDate').value);
-        const endDate = new Date(document.getElementById('endDate').value);
-        const days = (endDate - startDate) / (1000 * 60 * 60 * 24);
-        const pricePerDay = <%= listing.price %>;
-        const totalPrice = pricePerDay * days;
-        document.getElementById('totalPrice').value = totalPrice.toFixed(2);
-      });
-
-    // Set the Mapbox access token
-  mapboxgl.accessToken = 'pk.eyJ1Ijoib21tMDQwNSIsImEiOiJjbHlkdzg3bTQwYjNmMnJxd3BuNjVuMWNmIn0.7EzUxcKqB0fRWnh1Ba3s4w';
-
-  // Ensure listing object and coordinates are defined
-  if (listing && listing.geometry && listing.geometry.coordinates) {
-      // Initialize the map
-      const map = new mapboxgl.Map({
-          container: 'map', // ID of the map container
-          style: 'mapbox://styles/mapbox/streets-v12', // Map style URL
-          center: listing.geometry.coordinates, // Initial map center
-          zoom: 9 // Initial zoom level
-      });
-
-      // Add a marker to the map
-      const marker = new mapboxgl.Marker({ color: "red" })
-          .setLngLat(listing.geometry.coordinates)
-          .setPopup(new mapboxgl.Popup({ offset: 25 })
-          .setHTML(`<h4>${listing.title}</h4><p>Exact Location will be provided after booking</p>`))
-          .addTo(map);
-  } else {
-      console.error('Listing data or coordinates not available.');
+  btn.onclick = function() {
+    modal.style.display = "block";
   }
+  span.onclick = function() {
+    modal.style.display = "none";
+  }
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+
+  setTimeout(function() {
+    const flashMessage = document.querySelector('.flash-message');
+    if (flashMessage) {
+      flashMessage.style.display = 'none';
+    }
+  }, 3000);
+
+  // Calculate total price based on start and end dates
+  document.getElementById('endDate').addEventListener('change', function() {
+    const startDate = new Date(document.getElementById('startDate').value);
+    const endDate = new Date(document.getElementById('endDate').value);
+    const days = (endDate - startDate) / (1000 * 60 * 60 * 24);
+    const pricePerDay = <%= listing.price %>;
+    const totalPrice = pricePerDay * days;
+    document.getElementById('totalPrice').value = totalPrice.toFixed(2);
+  });
+
+  // Ensure the map initializes for all users
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [<%= listing.geometry.coordinates[0] %>, <%= listing.geometry.coordinates[1] %>], // Longitude, Latitude
+    zoom: 10
+  });
+
+  // Add marker to the map
+  new mapboxgl.Marker()
+    .setLngLat([<%= listing.geometry.coordinates[0] %>, <%= listing.geometry.coordinates[1] %>])
+    .addTo(map);
 </script>

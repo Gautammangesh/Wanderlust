@@ -8,6 +8,7 @@ const multer = require("multer");
 const { storage } = require("../cloudConfig.js");
 const upload = multer({ storage });
 
+// Route to list all listings
 router
   .route("/")
   .get(wrapAsync(listingController.index))
@@ -42,19 +43,10 @@ router.get(
   })
 );
 
-// router
-//   .route("/")
-//   .get(wrapAsync(listingController.index))
-//   .post(
-//     isLoggedIn,
-//     upload.single("listing[image]"),
-//     validateListing,
-//     wrapAsync(listingController.createListing)
-//   );
-
-//New Route
+// New Listing Route
 router.get("/new", isLoggedIn, listingController.renderNewForm);
 
+// Show, Update, and Delete Routes
 router
   .route("/:id")
   .get(wrapAsync(listingController.showListing))
@@ -63,16 +55,50 @@ router
     isOwner,
     upload.single("listing[image]"),
     validateListing,
-    wrapAsync(listingController.updateListing)
+    wrapAsync(async (req, res) => {
+      await listingController.updateListing(req, res);
+      req.flash("success", "Listing updated successfully!"); // Flash message for update
+      res.redirect(`/listings/${req.params.id}`);
+    })
   )
-  .delete(isLoggedIn, isOwner, wrapAsync(listingController.destroyListing));
+  .delete(
+    isLoggedIn,
+    isOwner,
+    wrapAsync(async (req, res) => {
+      await listingController.destroyListing(req, res);
+      req.flash("success", "Listing deleted successfully!"); // Flash message for delete
+      res.redirect("/listings");
+    })
+  );
 
-//Edit Route
+// Edit Route
 router.get(
   "/:id/edit",
   isLoggedIn,
   isOwner,
   wrapAsync(listingController.renderEditForm)
+);
+
+// Booking Route
+router.post(
+  "/:id/book",
+  isLoggedIn,
+  wrapAsync(async (req, res) => {
+    // Implement your booking logic here
+    const listing = await Listing.findById(req.params.id);
+    if (!listing) {
+      req.flash("error", "Cannot find that listing to book!");
+      return res.redirect("/listings");
+    }
+
+    // Assuming you have a Booking model or logic to save bookings
+    // Example booking logic (adjust according to your implementation)
+    // const booking = new Booking({ ...req.body, listingId: listing._id });
+    // await booking.save();
+
+    req.flash("success", `Successfully booked listing "${listing.title}"!`);
+    res.redirect(`/listings/${listing._id}`);
+  })
 );
 
 module.exports = router;
